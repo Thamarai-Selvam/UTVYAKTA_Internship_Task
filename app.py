@@ -4,34 +4,37 @@ import os
 import glob
 
 MATCHES = 500
-MIN_PERCENT = 0.15
+MIN_PERCENT = 90
 BASE_ORIGINAL_PATH = 'Image_Processing_Challenge/augmented_new/Original/original.jpg'
 BASE_TEST_PATH = 'Image_Processing_Challenge/augmented_new/Test_images/*.jpg'
 
 #get aligned Images
 
-def alignImages(image1, image2, image):
+def alignImages(testImg, orgImg, image):
 
     #print(image1, image2)
     #grayscale conversion
-    im1Gray = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-    im2Gray = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
+    testGray = cv2.cvtColor(testImg, cv2.COLOR_BGR2GRAY)
+    orgGray = cv2.cvtColor(orgImg, cv2.COLOR_BGR2GRAY)
+    height, width  = orgGray.shape
 
-    #ORB and descriptors
+    #ORB keypoints and descriptors
     orb = cv2.ORB_create(MATCHES)
-    key1, des1 = orb.detectAndCompute(im1Gray, None)
-    key2, des2 = orb.detectAndCompute(im2Gray, None)
+    key1, des1 = orb.detectAndCompute(testGray, None)
+    key2, des2 = orb.detectAndCompute(orgGray, None)
 
-    #Compare features via points    
-    find = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
+    #Compare features via Hamming Distance 
+    #find = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
+    find = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
     matches = find.match(des1, des2, None)
 
     #Sort matches
+    matches.sort(key = lambda x: x.distance)
     goodMatches = int(len(matches) * MIN_PERCENT)
     matches = matches[:goodMatches]
 
     #Draw Top Matches
-    matched = cv2.drawMatches(image1, key1, image2, key2, matches, None)
+    matched = cv2.drawMatches(testImg, key1, orgImg, key2, matches, None)
     cv2.imwrite('matched/matches'+str(image)+'.jpg', matched)
 
     #Good matches
@@ -43,13 +46,12 @@ def alignImages(image1, image2, image):
         points2[i, :] = key2[match.trainIdx].pt
 
     # Find homography
-    h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+    homo, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
        
     # Use homography
-    height, width, channels = image2.shape
-    im1Reg = cv2.warpPerspective(image1, h, (width, height))
+    aligned = cv2.warpPerspective(testImg, homo, (width, height))
     
-    return im1Reg, h
+    return aligned
 
 if __name__ == '__main__':
    
@@ -63,14 +65,18 @@ if __name__ == '__main__':
     
     image = 1
     for f in files:
-       testImage = f
-    
-       test = cv2.imread(testImage, cv2.IMREAD_COLOR)
+       
+        testImage = f
+        test = cv2.imread(testImage, cv2.IMREAD_COLOR)
 
-       print(str(image) +'-> Test image : ' + testImage, end=' ')
-       imReg, h = alignImages(test, original,image)
-       alignedImage = 'aligned/'+'aligned'+str(image) + '.jpg'
-       print(' -> '+ alignedImage)
-       cv2.imwrite(alignedImage, imReg)
+        print(str(image) +'-> Test image : ' + testImage, end=' ')
+       
+        aligned = alignImages(test, original, image)
 
-       image += 1
+        alignedImage = 'aligned/'+'aligned'+str(image) + '.jpg'
+       
+        print(' -> '+ alignedImage)
+       
+        cv2.imwrite(alignedImage, aligned)
+
+        image += 1
