@@ -4,7 +4,7 @@ import os
 import glob
 
 MATCHES = 500
-MIN_PERCENT = 90
+MIN_PERCENT = 80
 BASE_ORIGINAL_PATH = 'Image_Processing_Challenge/augmented_new/Original/original.jpg'
 BASE_TEST_PATH = 'Image_Processing_Challenge/augmented_new/Test_images/*.jpg'
 
