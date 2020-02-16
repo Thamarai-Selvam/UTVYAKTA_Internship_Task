@@ -10,7 +10,7 @@ BASE_TEST_PATH = 'Image_Processing_Challenge/augmented_new/Test_images/*.jpg'
 
 #get aligned Images
 
-def alignImages(image1, image2):
+def alignImages(image1, image2, image):
 
     #print(image1, image2)
     #grayscale conversion
@@ -32,7 +32,7 @@ def alignImages(image1, image2):
 
     #Draw Top Matches
     matched = cv2.drawMatches(image1, key1, image2, key2, matches, None)
-    cv2.imwrite('matched.jpg', matched)
+    cv2.imwrite('matched/matched'+str(image)+'.jpg', matched)
 
     #Good matches
     points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -67,10 +67,10 @@ if __name__ == '__main__':
     
        test = cv2.imread(testImage, cv2.IMREAD_COLOR)
 
-       print(str(image) +'-> Test image : ' + testImage)
-       imReg, h = alignImages(test, original)
+       print(str(image) +'-> Test image : ' + testImage, end=' ')
+       imReg, h = alignImages(test, original,image)
        alignedImage = 'aligned/'+'aligned'+str(image) + '.jpg'
-       print('Aligned Image : '+ alignedImage)
+       print(' -> '+ alignedImage)
        cv2.imwrite(alignedImage, imReg)
 
        image += 1
