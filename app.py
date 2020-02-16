@@ -1,8 +1,14 @@
 import cv2
 import numpy as np
+import os
+import glob
 
 MATCHES = 500
 MIN_PERCENT = 0.15
+BASE_ORIGINAL_PATH = 'Image_Processing_Challenge\\augmented_new\Original\\'
+BASE_TEST_PATH = 'Image_Processing_Challenge\\augmented_new\Test_images\\'
+
+#get aligned Images
 
 def alignImages(image1, image2):
 
@@ -46,20 +52,24 @@ def alignImages(image1, image2):
     return im1Reg, h
 
 if __name__ == '__main__':
-
+    
     originalImage = 'Image_Processing_Challenge\\augmented_new\Original\original.jpg'
     original = cv2.imread(originalImage, cv2.IMREAD_COLOR)
     
+    files = glob.glob(BASE_TEST_PATH + '*.jpg')
+    print(*files, end='\n')
+
     image = 1
-    testImage = 'Image_Processing_Challenge\\augmented_new\Test_images\\rot300.jpg'
+    for f in files:
+       testImage = f
+    
+       test = cv2.imread(testImage, cv2.IMREAD_COLOR)
 
+       print(str(image) +'-> Test image : ' + testImage)
+       imReg, h = alignImages(test, original)
+       alignedImage = 'aligned/'+'aligned'+str(image) + '.jpg'
+       print('Aligned Image : '+ alignedImage)
+       cv2.imwrite(alignedImage, imReg)
 
-    test = cv2.imread(testImage, cv2.IMREAD_COLOR)
-
-    print(str(image) +'-> Test image : ' + testImage)
-    imReg, h = alignImages(test, original)
-    alignedImage = 'aligned'+str(image) + '.jpg'
-    print('Aligned Image : '+ alignedImage)
-    cv2.imwrite(alignedImage, imReg)
-
-    print('Estimated Homography : \n\t', h)
+       image += 1
+       print('Estimated Homography : \n\t', h)
