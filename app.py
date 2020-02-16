@@ -32,7 +32,7 @@ def alignImages(image1, image2, image):
 
     #Draw Top Matches
     matched = cv2.drawMatches(image1, key1, image2, key2, matches, None)
-    cv2.imwrite('matched/matched'+str(image)+'.jpg', matched)
+    cv2.imwrite('matched/matches'+str(image)+'.jpg', matched)
 
     #Good matches
     points1 = np.zeros((len(matches), 2), dtype=np.float32)
